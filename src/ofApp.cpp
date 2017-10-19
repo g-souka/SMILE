@@ -139,7 +139,6 @@ void ofApp::update(){
 	if (videoSource->isFrameNew()) {
 		tracker.update(toCv(*videoSource));
 		sendFaceOsc(tracker);
-		rotationMatrix = tracker.getRotationMatrix();
 	}
 
 	vidGrabber.update();
@@ -156,7 +155,7 @@ void ofApp::draw(){
 
 	if (tracker.getFound()) {
 
-		if (mouthWidth >= 12.0 && mouthHeight >= 3.0) {
+		if (mouthWidth >= 16.0 && mouthHeight >= 6.0) {
 			ofSetColor(ofColor::gold);
 			ofDrawEllipse(camWidth * 0.5, 40 + camHeight, mouthWidth * 10, mouthHeight * 10);
 
@@ -190,14 +189,6 @@ void ofApp::draw(){
 			ofSetLineWidth(1);
 			tracker.getImageMesh().drawWireframe();
 
-			//ofPushView();
-			//ofSetupScreenOrtho(sourceWidth, sourceHeight, -1000, 1000);
-			//ofVec2f pos = tracker.getPosition();
-			//ofTranslate(pos.x, pos.y);
-			//applyMatrix(rotationMatrix);
-			//ofScale(10, 10, 10);
-			//ofDrawAxis(tracker.getScale());
-			//ofPopView();
 		}
 	}
 
@@ -216,7 +207,7 @@ void ofApp::draw(){
 	}
 
 	ofDrawBitmapString("Framerate: " + ofToString((int)ofGetFrameRate()), 20, ofGetHeight() - 40);
-	ofDrawBitmapString("Press: space to pause, 'p' to capture photo, 'g' to toggle gui, 'm' to toggle mesh, 'r' to reset tracker.", 20, ofGetHeight() - 20);
+	ofDrawBitmapString("Press: space to pause, 'g' to toggle gui, 'm' to toggle mesh, 'r' to reset tracker.", 20, ofGetHeight() - 20);
 
 }
 
@@ -243,15 +234,6 @@ void ofApp::keyPressed(int key){
 
 		case 'g':
 			bGuiVisible = !bGuiVisible;
-			break;
-
-		case 'p':
-			ofPixels & pixels = vidGrabber.getPixels();
-			for (int i = 0; i < pixels.size(); i++) {
-				photoFrame[i] = pixels[i];
-			}
-			photoFrameTexture.loadData(photoFrame);
-			ofSaveImage(photoFrame, ofToString("photoFrame-" + ofGetTimestampString()) + ".jpg");
 			break;
 	}
 
