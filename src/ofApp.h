@@ -28,9 +28,10 @@ class ofApp : public ofBaseApp, public FaceOsc {
         void gotMessage(ofMessage msg);
 */  
         ofVideoGrabber vidGrabber;
-		ofPixels photoFrame;
-		ofTexture photoFrameTexture;
-		ofImage photo;
+		ofPixels photoFrameNeutral;
+		ofTexture photoFrameNeutralTexture;
+		ofPixels photoFrameIdeal;
+		ofTexture photoFrameIdealTexture;
 
         int camWidth, camHeight;
 		int sourceWidth, sourceHeight;
@@ -47,5 +48,14 @@ class ofApp : public ofBaseApp, public FaceOsc {
 		bool bPaused;
 		bool bDrawMesh;
 		bool bGuiVisible;
-		bool bHasPhoto;
+		bool bHasPhotoNeutral;
+		bool bHasPhotoIdeal;
+		bool bTextVisible;
+
+		ofTrueTypeFont verdana14;
+		ofTrueTypeFont verdana40;
+
+		string sHello, sPressKey;
+		string sBestSmile, sDoBetter, sAlmost, sGreat;
+		
 };

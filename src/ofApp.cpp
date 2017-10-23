@@ -13,7 +13,7 @@ void ofApp::loadSettings() {
 	//ofSetDataPathRoot("../Resources/data/");
 
 	// setup gui
-	bGuiVisible = true;
+	bGuiVisible = false;
 	gui.setup();
 	gui.setName("FaceOSC");
 	gui.setPosition(0, 0);
@@ -89,10 +89,12 @@ void ofApp::loadSettings() {
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-	ofSetWindowTitle("Face Tracking With Smile Photo Capture");	
+	ofSetWindowTitle("SMILE :—)");
 	ofSetVerticalSync(true);
 
-	bHasPhoto = false;
+	bHasPhotoNeutral = false;
+	bHasPhotoIdeal = false;
+	bTextVisible = true;
 	
 	//we can now get back a list of devices.
     vector<ofVideoDevice> devices = vidGrabber.listDevices();
@@ -112,13 +114,34 @@ void ofApp::setup(){
     vidGrabber.setDesiredFrameRate(60);
     vidGrabber.initGrabber(camWidth, camHeight);
 
-	photoFrame.allocate(camWidth, camHeight, OF_PIXELS_RGB);
-	photoFrameTexture.allocate(photoFrame);
-
-	loadSettings();
+	photoFrameNeutral.allocate(camWidth, camHeight, OF_PIXELS_RGB);
+	photoFrameNeutralTexture.allocate(photoFrameNeutral);
+	photoFrameIdeal.allocate(camWidth, camHeight, OF_PIXELS_RGB);
+	photoFrameIdealTexture.allocate(photoFrameIdeal);
 
 	mouthWidth = tracker.getGesture(ofxFaceTracker::MOUTH_WIDTH);
 	mouthHeight = tracker.getGesture(ofxFaceTracker::MOUTH_HEIGHT);
+
+	// font configuration
+	ofTrueTypeFont::setGlobalDpi(72);
+
+	verdana14.load("verdana.ttf", 14, true, true);
+	verdana14.setLineHeight(18.0f);
+	verdana14.setLetterSpacing(1.037);
+
+	verdana40.load("verdana.ttf", 40, true, true);
+	verdana40.setLineHeight(48.0f);
+	verdana40.setLetterSpacing(1.100);
+
+	// string configuration
+	sHello = "HELLO";
+	sPressKey = "PLEASE PRESS ANY KEY";
+	sBestSmile = "GIVE US YOUR BEST SMILE!";
+	sDoBetter = "YOU CAN DO BETTER";
+	sAlmost = "ALMOST THERE";
+	sGreat = "THAT'S GREAT";
+
+	loadSettings();
 	
 }
 
@@ -126,9 +149,9 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update(){
 
-	// esta variavel tem que ser definida no update
-	// provavelmente por estar a ser enviada por OSC em tempo real
-	// no setup não funciona
+	// in order to update in real time
+	// the tracker variables must also be set in update()
+
 	mouthWidth = tracker.getGesture(ofxFaceTracker::MOUTH_WIDTH);
 	mouthHeight = tracker.getGesture(ofxFaceTracker::MOUTH_HEIGHT);
 
@@ -148,32 +171,76 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-	ofBackground(ofColor::teal);
+	ofBackground(ofColor::powderBlue);
 
-    vidGrabber.draw(0, 0);
-	photoFrameTexture.draw(camWidth, 0, camWidth, camHeight);
+	vidGrabber.draw(ofGetWindowWidth() * 0.5 - (vidGrabber.getWidth() * 0.5), ofGetWindowHeight() * 0.5 - (vidGrabber.getHeight() * 0.5));
+	photoFrameNeutralTexture.draw(ofGetWindowWidth() * 0.5 - (vidGrabber.getWidth() * 0.5), camHeight + ofGetWindowHeight() * 0.5 - (vidGrabber.getHeight() * 0.5), camWidth * 0.5, camHeight * 0.5);
+	photoFrameIdealTexture.draw(camWidth * 0.5 + ofGetWindowWidth() * 0.5 - (vidGrabber.getWidth() * 0.5), camHeight + ofGetWindowHeight() * 0.5 - (vidGrabber.getHeight() * 0.5), camWidth * 0.5, camHeight * 0.5);
 
-	if (tracker.getFound()) {
 
-		if (mouthWidth >= 16.0 && mouthHeight >= 6.0) {
-			ofSetColor(ofColor::gold);
-			ofDrawEllipse(camWidth * 0.5, 40 + camHeight, mouthWidth * 10, mouthHeight * 10);
+	if (bTextVisible) {
 
-			if (bHasPhoto == false) {
+		ofSetColor(255, 255, 255, 240);
+		ofDrawRectangle(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
+
+		ofSetColor(ofColor::black);
+		ofRectangle boundsHello = verdana40.getStringBoundingBox(sHello, 0, 0);
+		verdana40.drawString(sHello, ofGetWindowWidth() * 0.5 - boundsHello.width * 0.5, ofGetWindowHeight() * 0.4);
+		
+		ofRectangle boundsPressKey = verdana40.getStringBoundingBox(sPressKey, 0, 0);
+		verdana40.drawString(sPressKey, ofGetWindowWidth() * 0.5 - boundsPressKey.width * 0.5, ofGetWindowHeight() * 0.4 + 48.0f);
+	}
+
+	// when the user presses the key to remove the text and initiate the interaction
+	// the first photo labelled Neutral is taken after 1000 ms
+
+	else if (bHasPhotoNeutral == false) {
+		Sleep(1000);
+
+		ofPixels & pixels = vidGrabber.getPixels();
+		for (int i = 0; i < pixels.size(); i++) {
+			photoFrameNeutral[i] = pixels[i];
+		}
+		photoFrameNeutralTexture.loadData(photoFrameNeutral);
+		ofSaveImage(photoFrameNeutral, ofToString("photoFrameNeutral-" + ofGetTimestampString()) + ".jpg");
+
+		bHasPhotoNeutral = true;
+	}
+
+	if (bTextVisible == false) {
+		ofSetColor(ofColor::mistyRose);
+		ofRectangle boundsBestSmile = verdana40.getStringBoundingBox(sBestSmile, 0, 0);
+		verdana40.drawString(sBestSmile, ofGetWindowWidth() * 0.5 - boundsBestSmile.width * 0.5, 50);
+	}
+
+	if (tracker.getFound() && bTextVisible == false) {
+
+		if (mouthWidth <= 14.0 || mouthHeight <= 3.0) {
+			ofRectangle boundsDoBetter = verdana14.getStringBoundingBox(sDoBetter, 0, 0);
+			verdana14.drawString(sDoBetter, ofGetWindowWidth() * 0.5 - boundsDoBetter.width * 0.5, ofGetWindowHeight() * 0.6);
+		}
+
+		else if (mouthWidth >= 17.0 && mouthHeight >= 4.0) {
+			ofRectangle boundsGreat = verdana14.getStringBoundingBox(sGreat, 0, 0);
+			verdana14.drawString(sGreat, ofGetWindowWidth() * 0.5 - boundsGreat.width * 0.5, ofGetWindowHeight() * 0.6);
+
+			// implementar TIMER aqui
+
+			if (bHasPhotoIdeal == false) {
 				ofPixels & pixels = vidGrabber.getPixels();
 				for (int i = 0; i < pixels.size(); i++) {
-					photoFrame[i] = pixels[i];
+					photoFrameIdeal[i] = pixels[i];
 				}
-				photoFrameTexture.loadData(photoFrame);
-				ofSaveImage(photoFrame, ofToString("photoFrame-" + ofGetTimestampString()) + ".jpg");
+				photoFrameIdealTexture.loadData(photoFrameIdeal);
+				ofSaveImage(photoFrameIdeal, ofToString("photoFrameIdeal-" + ofGetTimestampString()) + ".jpg");
 
-				bHasPhoto = true;
-				cout << bHasPhoto;
+				bHasPhotoIdeal = true;
 			}
 		}
+
 		else {
-			ofSetColor(ofColor::darkOrchid);
-			ofDrawEllipse(camWidth * 0.5, 40 + camHeight, mouthWidth * 10, mouthHeight * 10);
+			ofRectangle boundsAlmost = verdana14.getStringBoundingBox(sAlmost, 0, 0);
+			verdana14.drawString(sAlmost, ofGetWindowWidth() * 0.5 - boundsAlmost.width * 0.5, ofGetWindowHeight() * 0.6);
 		}
 
 		ofSetColor(255);
@@ -181,13 +248,13 @@ void ofApp::draw(){
 		ofDrawBitmapString("Width: " + ofToString(mouthWidth), 20, ofGetHeight() - 80);
 		ofDrawBitmapString("Height: " + ofToString(mouthHeight), 20, ofGetHeight() - 60);
 
-		//	Valores de threshold Guilherme no comboio
-		//	W: maior que 18
-		//	H: maior que 6
-
 		if (bDrawMesh) {
 			ofSetLineWidth(1);
+			ofPushView();
+			ofTranslate(ofGetWindowWidth() * 0.5 - (vidGrabber.getWidth() * 0.5), ofGetWindowHeight() * 0.5 - (vidGrabber.getHeight() * 0.5));
 			tracker.getImageMesh().drawWireframe();
+			//tracker.getImageMesh().drawFaces();
+			ofPopView();
 
 		}
 	}
@@ -207,13 +274,14 @@ void ofApp::draw(){
 	}
 
 	ofDrawBitmapString("Framerate: " + ofToString((int)ofGetFrameRate()), 20, ofGetHeight() - 40);
-	ofDrawBitmapString("Press: space to pause, 'g' to toggle gui, 'm' to toggle mesh, 'r' to reset tracker.", 20, ofGetHeight() - 20);
+	ofDrawBitmapString("Press: ' ' to pause, 'g' to toggle gui, 'm' to toggle mesh, 'r' to reset tracker.", 20, ofGetHeight() - 20);
 
 }
 
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
+
 	if(key == 's' || key == 'S'){
         vidGrabber.videoSettings();
     }
@@ -234,6 +302,10 @@ void ofApp::keyPressed(int key){
 
 		case 'g':
 			bGuiVisible = !bGuiVisible;
+			break;
+
+		case 't':
+			bTextVisible = !bTextVisible;
 			break;
 	}
 
