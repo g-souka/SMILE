@@ -88,6 +88,14 @@ void ofApp::loadSettings() {
 
 
 //--------------------------------------------------------------
+//void ofApp::videoCenter() {
+//
+//	videoInputCenterW = videoInput.getWidth() * 0.5;
+//	videoInputCenterH = videoInput.getHeight() * 0.5);
+//
+//}
+
+//--------------------------------------------------------------
 void ofApp::setup(){
 	ofSetWindowTitle("SMILE :—)");
 	ofSetVerticalSync(true);
@@ -150,10 +158,12 @@ void ofApp::setup(){
 void ofApp::update(){
 
 	// in order to update in real time
-	// the tracker variables must also be set in update()
+	// the following variables must also be set in update()
 
 	mouthWidth = tracker.getGesture(ofxFaceTracker::MOUTH_WIDTH);
 	mouthHeight = tracker.getGesture(ofxFaceTracker::MOUTH_HEIGHT);
+	windowCenterW = ofGetWindowWidth() * 0.5;
+	windowCenterH = ofGetWindowHeight() * 0.5;
 
 	if (bPaused)
 		return;
@@ -165,7 +175,6 @@ void ofApp::update(){
 	}
 
 	vidGrabber.update();
-
 }
 
 //--------------------------------------------------------------
@@ -173,9 +182,9 @@ void ofApp::draw(){
 
 	ofBackground(ofColor::powderBlue);
 
-	vidGrabber.draw(ofGetWindowWidth() * 0.5 - (vidGrabber.getWidth() * 0.5), ofGetWindowHeight() * 0.5 - (vidGrabber.getHeight() * 0.5));
-	photoFrameNeutralTexture.draw(ofGetWindowWidth() * 0.5 - (vidGrabber.getWidth() * 0.5), camHeight + ofGetWindowHeight() * 0.5 - (vidGrabber.getHeight() * 0.5), camWidth * 0.5, camHeight * 0.5);
-	photoFrameIdealTexture.draw(camWidth * 0.5 + ofGetWindowWidth() * 0.5 - (vidGrabber.getWidth() * 0.5), camHeight + ofGetWindowHeight() * 0.5 - (vidGrabber.getHeight() * 0.5), camWidth * 0.5, camHeight * 0.5);
+	vidGrabber.draw(windowCenterW - (camWidth * 0.5), windowCenterH - (camHeight * 0.5));
+	//photoFrameNeutralTexture.draw(windowCenterW - (camWidth * 0.5), camHeight * 0.5 + windowCenterH, camWidth * 0.5, camHeight * 0.5);
+	//photoFrameIdealTexture.draw(windowCenterW, camHeight * 0.5 + windowCenterH, camWidth * 0.5, camHeight * 0.5);
 
 
 	if (bTextVisible) {
@@ -202,7 +211,7 @@ void ofApp::draw(){
 			photoFrameNeutral[i] = pixels[i];
 		}
 		photoFrameNeutralTexture.loadData(photoFrameNeutral);
-		ofSaveImage(photoFrameNeutral, ofToString("photoFrameNeutral-" + ofGetTimestampString()) + ".jpg");
+		ofSaveImage(photoFrameNeutral, ofToString(ofGetTimestampString() + " - photoFrameNeutral") + ".jpg");
 
 		bHasPhotoNeutral = true;
 	}
@@ -210,17 +219,17 @@ void ofApp::draw(){
 	if (bTextVisible == false) {
 		ofSetColor(ofColor::mistyRose);
 		ofRectangle boundsBestSmile = verdana40.getStringBoundingBox(sBestSmile, 0, 0);
-		verdana40.drawString(sBestSmile, ofGetWindowWidth() * 0.5 - boundsBestSmile.width * 0.5, 50);
+		verdana40.drawString(sBestSmile, ofGetWindowWidth() * 0.5 - boundsBestSmile.width * 0.5, camHeight * 0.25);
 	}
 
 	if (tracker.getFound() && bTextVisible == false) {
 
-		if (mouthWidth <= 14.0 || mouthHeight <= 3.0) {
+		if (mouthWidth <= 12.0 || mouthHeight <= 2.0) {
 			ofRectangle boundsDoBetter = verdana14.getStringBoundingBox(sDoBetter, 0, 0);
 			verdana14.drawString(sDoBetter, ofGetWindowWidth() * 0.5 - boundsDoBetter.width * 0.5, ofGetWindowHeight() * 0.6);
 		}
 
-		else if (mouthWidth >= 17.0 && mouthHeight >= 4.0) {
+		else if (mouthWidth >= 16.0 && mouthHeight >= 4.0) {
 			ofRectangle boundsGreat = verdana14.getStringBoundingBox(sGreat, 0, 0);
 			verdana14.drawString(sGreat, ofGetWindowWidth() * 0.5 - boundsGreat.width * 0.5, ofGetWindowHeight() * 0.6);
 
@@ -232,7 +241,7 @@ void ofApp::draw(){
 					photoFrameIdeal[i] = pixels[i];
 				}
 				photoFrameIdealTexture.loadData(photoFrameIdeal);
-				ofSaveImage(photoFrameIdeal, ofToString("photoFrameIdeal-" + ofGetTimestampString()) + ".jpg");
+				ofSaveImage(photoFrameIdeal, ofToString(ofGetTimestampString() + " - photoFrameIdeal") + ".jpg");
 
 				bHasPhotoIdeal = true;
 			}

@@ -10,6 +10,7 @@ class ofApp : public ofBaseApp, public FaceOsc {
     public:
 
 		void loadSettings();
+		//void videoCenter();
 
         void setup();
         void update();
@@ -34,6 +35,7 @@ class ofApp : public ofBaseApp, public FaceOsc {
 		ofTexture photoFrameIdealTexture;
 
         int camWidth, camHeight;
+		int windowCenterW, windowCenterH;
 		int sourceWidth, sourceHeight;
 		float mouthHeight, mouthWidth;
 
