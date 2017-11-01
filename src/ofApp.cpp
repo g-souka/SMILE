@@ -87,13 +87,6 @@ void ofApp::loadSettings() {
 }
 
 
-//--------------------------------------------------------------
-//void ofApp::videoCenter() {
-//
-//	videoInputCenterW = videoInput.getWidth() * 0.5;
-//	videoInputCenterH = videoInput.getHeight() * 0.5);
-//
-//}
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -102,9 +95,8 @@ void ofApp::setup(){
 
 	bHasPhotoNeutral = false;
 	bHasPhotoIdeal = false;
-	bTextVisible = true;
 	
-	//we can now get back a list of devices.
+	// print a list of avaiable devices
     vector<ofVideoDevice> devices = vidGrabber.listDevices();
 
     for(int i = 0; i < devices.size(); i++){
@@ -115,18 +107,23 @@ void ofApp::setup(){
         }
     }
 
-	camWidth = 640;  // try to grab at this size.
+	// camera input size, try to grab at this size
+	camWidth = 640;
 	camHeight = 480;
 
+	// choose device
 	vidGrabber.setDeviceID(1);
     vidGrabber.setDesiredFrameRate(60);
     vidGrabber.initGrabber(camWidth, camHeight);
 
+	// allocate memory for photos
 	photoFrameNeutral.allocate(camWidth, camHeight, OF_PIXELS_RGB);
 	photoFrameNeutralTexture.allocate(photoFrameNeutral);
 	photoFrameIdeal.allocate(camWidth, camHeight, OF_PIXELS_RGB);
 	photoFrameIdealTexture.allocate(photoFrameIdeal);
 
+
+	// face tracker variable configuration
 	mouthWidth = tracker.getGesture(ofxFaceTracker::MOUTH_WIDTH);
 	mouthHeight = tracker.getGesture(ofxFaceTracker::MOUTH_HEIGHT);
 
@@ -143,14 +140,25 @@ void ofApp::setup(){
 
 	// string configuration
 	sHello = "HELLO";
-	sPressKey = "PLEASE PRESS ANY KEY";
+	sPressKey = "USE THE ARROWS TO NAVIGATE";
 	sBestSmile = "GIVE US YOUR BEST SMILE!";
 	sDoBetter = "YOU CAN DO BETTER";
 	sAlmost = "ALMOST THERE";
 	sGreat = "THAT'S GREAT";
 
+	// xml settings load
 	loadSettings();
+
+	// load images
+	image01.load("images/image01.png");
+	image02.load("images/image02.png");
+	image03.load("images/image03.png");
+	imgNum = 0;
 	
+	// timer configuration
+	bTimerReached = false;
+	startTime = ofGetElapsedTimeMillis();
+	endTime = 3000;
 }
 
 
@@ -162,6 +170,7 @@ void ofApp::update(){
 
 	mouthWidth = tracker.getGesture(ofxFaceTracker::MOUTH_WIDTH);
 	mouthHeight = tracker.getGesture(ofxFaceTracker::MOUTH_HEIGHT);
+
 	windowCenterW = ofGetWindowWidth() * 0.5;
 	windowCenterH = ofGetWindowHeight() * 0.5;
 
@@ -182,12 +191,7 @@ void ofApp::draw(){
 
 	ofBackground(ofColor::powderBlue);
 
-	vidGrabber.draw(windowCenterW - (camWidth * 0.5), windowCenterH - (camHeight * 0.5));
-	//photoFrameNeutralTexture.draw(windowCenterW - (camWidth * 0.5), camHeight * 0.5 + windowCenterH, camWidth * 0.5, camHeight * 0.5);
-	//photoFrameIdealTexture.draw(windowCenterW, camHeight * 0.5 + windowCenterH, camWidth * 0.5, camHeight * 0.5);
-
-
-	if (bTextVisible) {
+	if (imgNum == 0) {
 
 		ofSetColor(255, 255, 255, 240);
 		ofDrawRectangle(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
@@ -200,29 +204,48 @@ void ofApp::draw(){
 		verdana40.drawString(sPressKey, ofGetWindowWidth() * 0.5 - boundsPressKey.width * 0.5, ofGetWindowHeight() * 0.4 + 48.0f);
 	}
 
-	// when the user presses the key to remove the text and initiate the interaction
-	// the first photo labelled Neutral is taken after 1000 ms
+	// when the user presses the key to move to the first image
+	// the first photo labelled Neutral is taken after 3000 ms
 
-	else if (bHasPhotoNeutral == false) {
-		Sleep(1000);
+	if (imgNum == 1) {
+		image01.draw(windowCenterW - image01.getWidth() * 0.5, windowCenterH - image01.getHeight() * 0.5);
 
-		ofPixels & pixels = vidGrabber.getPixels();
-		for (int i = 0; i < pixels.size(); i++) {
-			photoFrameNeutral[i] = pixels[i];
+		if (bHasPhotoNeutral == false) {
+			
+			float timer = ofGetElapsedTimeMillis() - startTime;
+			
+			if (timer >= endTime && !bTimerReached) {
+				bTimerReached = true;
+			}
+
+			if (bTimerReached) {
+				ofPixels & pixels = vidGrabber.getPixels();
+				for (int i = 0; i < pixels.size(); i++) {
+					photoFrameNeutral[i] = pixels[i];
+				}
+				photoFrameNeutralTexture.loadData(photoFrameNeutral);
+				ofSaveImage(photoFrameNeutral, ofToString(ofGetTimestampString() + " - photoFrameNeutral") + ".jpg");
+
+				bHasPhotoNeutral = true;
+			}
 		}
-		photoFrameNeutralTexture.loadData(photoFrameNeutral);
-		ofSaveImage(photoFrameNeutral, ofToString(ofGetTimestampString() + " - photoFrameNeutral") + ".jpg");
-
-		bHasPhotoNeutral = true;
 	}
 
-	if (bTextVisible == false) {
+
+	if (imgNum == 2) { image02.draw(windowCenterW - image02.getWidth() * 0.5, windowCenterH - image02.getHeight() * 0.5); }
+	if (imgNum == 3) { image03.draw(windowCenterW - image03.getWidth() * 0.5, windowCenterH - image03.getHeight() * 0.5); }
+
+	if (imgNum == 4) {
 		ofSetColor(ofColor::mistyRose);
 		ofRectangle boundsBestSmile = verdana40.getStringBoundingBox(sBestSmile, 0, 0);
 		verdana40.drawString(sBestSmile, ofGetWindowWidth() * 0.5 - boundsBestSmile.width * 0.5, camHeight * 0.25);
+
+		vidGrabber.draw(windowCenterW - (camWidth * 0.5), windowCenterH - (camHeight * 0.5));
+		//photoFrameNeutralTexture.draw(windowCenterW - (camWidth * 0.5), camHeight * 0.5 + windowCenterH, camWidth * 0.5, camHeight * 0.5);
+		//photoFrameIdealTexture.draw(windowCenterW, camHeight * 0.5 + windowCenterH, camWidth * 0.5, camHeight * 0.5);
 	}
 
-	if (tracker.getFound() && bTextVisible == false) {
+	if (tracker.getFound() && imgNum == 4) {
 
 		if (mouthWidth <= 12.0 || mouthHeight <= 2.0) {
 			ofRectangle boundsDoBetter = verdana14.getStringBoundingBox(sDoBetter, 0, 0);
@@ -282,6 +305,7 @@ void ofApp::draw(){
 		gui.draw();
 	}
 
+	ofDrawBitmapString("imgNum " + ofToString(imgNum), 20, ofGetHeight() - 60);
 	ofDrawBitmapString("Framerate: " + ofToString((int)ofGetFrameRate()), 20, ofGetHeight() - 40);
 	ofDrawBitmapString("Press: ' ' to pause, 'g' to toggle gui, 'm' to toggle mesh, 'r' to reset tracker.", 20, ofGetHeight() - 20);
 
@@ -294,6 +318,9 @@ void ofApp::keyPressed(int key){
 	if(key == 's' || key == 'S'){
         vidGrabber.videoSettings();
     }
+
+	if (key == OF_KEY_LEFT && imgNum > 0)		imgNum--;
+	else if (key == OF_KEY_RIGHT && imgNum < 4)	imgNum++;
 
 	switch (key) {
 	
@@ -311,10 +338,6 @@ void ofApp::keyPressed(int key){
 
 		case 'g':
 			bGuiVisible = !bGuiVisible;
-			break;
-
-		case 't':
-			bTextVisible = !bTextVisible;
 			break;
 	}
 
@@ -346,9 +369,12 @@ void ofApp::mouseMoved(int x, int y){
 void ofApp::mouseDragged(int x, int y, int button){
 }
 
+
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
+
 }
+
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){

@@ -10,7 +10,6 @@ class ofApp : public ofBaseApp, public FaceOsc {
     public:
 
 		void loadSettings();
-		//void videoCenter();
 
         void setup();
         void update();
@@ -21,7 +20,7 @@ class ofApp : public ofBaseApp, public FaceOsc {
         void mouseMoved(int x, int y);
         void mouseDragged(int x, int y, int button);
         void mousePressed(int x, int y, int button);
-        void mouseReleased(int x, int y, int button);
+	    void mouseReleased(int x, int y, int button);
         void mouseEntered(int x, int y);
         void mouseExited(int x, int y);
         void windowResized(int w, int h);
@@ -52,12 +51,16 @@ class ofApp : public ofBaseApp, public FaceOsc {
 		bool bGuiVisible;
 		bool bHasPhotoNeutral;
 		bool bHasPhotoIdeal;
-		bool bTextVisible;
 
 		ofTrueTypeFont verdana14;
 		ofTrueTypeFont verdana40;
 
 		string sHello, sPressKey;
 		string sBestSmile, sDoBetter, sAlmost, sGreat;
+
+		ofImage image01, image02, image03;
+		int imgNum;
 		
+		float startTime, endTime;
+		bool bTimerReached;
 };
