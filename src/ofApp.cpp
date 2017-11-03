@@ -96,7 +96,7 @@ void ofApp::setup(){
 	bHasPhotoNeutral = false;
 	bHasPhotoIdeal = false;
 	
-	// print a list of avaiable devices
+	// print a list of avaiable input devices
     vector<ofVideoDevice> devices = vidGrabber.listDevices();
 
     for(int i = 0; i < devices.size(); i++){
@@ -121,7 +121,6 @@ void ofApp::setup(){
 	photoFrameNeutralTexture.allocate(photoFrameNeutral);
 	photoFrameIdeal.allocate(camWidth, camHeight, OF_PIXELS_RGB);
 	photoFrameIdealTexture.allocate(photoFrameIdeal);
-
 
 	// face tracker variable configuration
 	mouthWidth = tracker.getGesture(ofxFaceTracker::MOUTH_WIDTH);
@@ -150,15 +149,18 @@ void ofApp::setup(){
 	loadSettings();
 
 	// load images
-	image01.load("images/image01.png");
-	image02.load("images/image02.png");
-	image03.load("images/image03.png");
-	imgNum = 0;
+	text01.load("images/text01.png");
+	text02.load("images/text02.png");
+	text03.load("images/text03.png");
+	text04.load("images/text04.png");
+	//text05.load("images/text05.png");
+	//text06.load("images/text06.png");
+	momentNum = 1;
 	
 	// timer configuration
 	bTimerReached = false;
 	startTime = ofGetElapsedTimeMillis();
-	endTime = 3000;
+	endTime = 2000;
 }
 
 
@@ -184,36 +186,29 @@ void ofApp::update(){
 	}
 
 	vidGrabber.update();
+
+	t = ofGetElapsedTimef();
+	alphaOscillation = (sin(t * 0.2 * TWO_PI) * 0.5 + 0.5);
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-	ofBackground(ofColor::powderBlue);
+	ofBackground(ofColor::fireBrick);
 
-	if (imgNum == 0) {
-
-		ofSetColor(255, 255, 255, 240);
-		ofDrawRectangle(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
-
-		ofSetColor(ofColor::black);
-		ofRectangle boundsHello = verdana40.getStringBoundingBox(sHello, 0, 0);
-		verdana40.drawString(sHello, ofGetWindowWidth() * 0.5 - boundsHello.width * 0.5, ofGetWindowHeight() * 0.4);
-		
-		ofRectangle boundsPressKey = verdana40.getStringBoundingBox(sPressKey, 0, 0);
-		verdana40.drawString(sPressKey, ofGetWindowWidth() * 0.5 - boundsPressKey.width * 0.5, ofGetWindowHeight() * 0.4 + 48.0f);
+	if (momentNum == 1) {
+		text01.draw(windowCenterW - text01.getWidth() * 0.5, windowCenterH - text01.getHeight() * 0.5);
 	}
 
-	// when the user presses the key to move to the first image
-	// the first photo labelled Neutral is taken after 3000 ms
+	// when the user presses the key to move to the second moment
+	// the first photo labelled Neutral is taken after 2000 ms
 
-	if (imgNum == 1) {
-		image01.draw(windowCenterW - image01.getWidth() * 0.5, windowCenterH - image01.getHeight() * 0.5);
-
+	if (momentNum == 2) {
+		text02.draw(windowCenterW - text02.getWidth() * 0.5, windowCenterH - text02.getHeight() * 0.5);
+		
 		if (bHasPhotoNeutral == false) {
 			
 			float timer = ofGetElapsedTimeMillis() - startTime;
-			
 			if (timer >= endTime && !bTimerReached) {
 				bTimerReached = true;
 			}
@@ -232,20 +227,18 @@ void ofApp::draw(){
 	}
 
 
-	if (imgNum == 2) { image02.draw(windowCenterW - image02.getWidth() * 0.5, windowCenterH - image02.getHeight() * 0.5); }
-	if (imgNum == 3) { image03.draw(windowCenterW - image03.getWidth() * 0.5, windowCenterH - image03.getHeight() * 0.5); }
+	if (momentNum == 3) { text03.draw(windowCenterW - text03.getWidth() * 0.5, windowCenterH - text03.getHeight() * 0.5); }
+	if (momentNum == 4) { text04.draw(windowCenterW - text04.getWidth() * 0.5, windowCenterH - text04.getHeight() * 0.5); }
 
-	if (imgNum == 4) {
+	if (momentNum == 5) {
 		ofSetColor(ofColor::mistyRose);
 		ofRectangle boundsBestSmile = verdana40.getStringBoundingBox(sBestSmile, 0, 0);
 		verdana40.drawString(sBestSmile, ofGetWindowWidth() * 0.5 - boundsBestSmile.width * 0.5, camHeight * 0.25);
 
 		vidGrabber.draw(windowCenterW - (camWidth * 0.5), windowCenterH - (camHeight * 0.5));
-		//photoFrameNeutralTexture.draw(windowCenterW - (camWidth * 0.5), camHeight * 0.5 + windowCenterH, camWidth * 0.5, camHeight * 0.5);
-		//photoFrameIdealTexture.draw(windowCenterW, camHeight * 0.5 + windowCenterH, camWidth * 0.5, camHeight * 0.5);
 	}
 
-	if (tracker.getFound() && imgNum == 4) {
+	if (tracker.getFound() && momentNum == 5) {
 
 		if (mouthWidth <= 12.0 || mouthHeight <= 2.0) {
 			ofRectangle boundsDoBetter = verdana14.getStringBoundingBox(sDoBetter, 0, 0);
@@ -257,6 +250,8 @@ void ofApp::draw(){
 			verdana14.drawString(sGreat, ofGetWindowWidth() * 0.5 - boundsGreat.width * 0.5, ofGetWindowHeight() * 0.6);
 
 			// implementar TIMER aqui
+			// dar feedback sobre a foto ser tirada
+			// saltar para o proximo automaticamente
 
 			if (bHasPhotoIdeal == false) {
 				ofPixels & pixels = vidGrabber.getPixels();
@@ -275,40 +270,58 @@ void ofApp::draw(){
 			verdana14.drawString(sAlmost, ofGetWindowWidth() * 0.5 - boundsAlmost.width * 0.5, ofGetWindowHeight() * 0.6);
 		}
 
-		ofSetColor(255);
-		ofDrawBitmapString("sending OSC to " + host + ":" + ofToString(port), 20, ofGetHeight() - 100);
-		ofDrawBitmapString("Width: " + ofToString(mouthWidth), 20, ofGetHeight() - 80);
-		ofDrawBitmapString("Height: " + ofToString(mouthHeight), 20, ofGetHeight() - 60);
+		ofSetColor(0);
+		ofDrawBitmapString("sending OSC to " + host + ":" + ofToString(port), 20, ofGetHeight() - 140);
+		ofDrawBitmapString("Width: " + ofToString(mouthWidth), 20, ofGetHeight() - 120);
+		ofDrawBitmapString("Height: " + ofToString(mouthHeight), 20, ofGetHeight() - 100);
 
 		if (bDrawMesh) {
+			ofSetColor(255, 255, 255, 255 * alphaOscillation);
 			ofSetLineWidth(1);
 			ofPushView();
 			ofTranslate(ofGetWindowWidth() * 0.5 - (vidGrabber.getWidth() * 0.5), ofGetWindowHeight() * 0.5 - (vidGrabber.getHeight() * 0.5));
 			tracker.getImageMesh().drawWireframe();
 			//tracker.getImageMesh().drawFaces();
 			ofPopView();
-
 		}
 	}
 
-	else {
-		ofSetColor(255);
-		ofDrawBitmapString("Searching for face...", 20, ofGetHeight() - 100);
+	if (tracker.getFound() == false && momentNum == 5) {
+		ofSetColor(0);
+		ofDrawBitmapString("Searching for face...", 20, ofGetHeight() - 140);
+	}
+
+	if (momentNum == 6) {
+		photoFrameNeutralTexture.draw(windowCenterW - camWidth, windowCenterH - (camHeight * 0.5), camWidth, camHeight);
+		photoFrameIdealTexture.draw(windowCenterW, windowCenterH - (camHeight * 0.5), camWidth, camHeight);
+	}
+
+	if (momentNum == 7) {
+		text05.draw(windowCenterW - text05.getWidth() * 0.5, windowCenterH - text05.getHeight() * 0.5);
+	}
+	
+	if (momentNum == 8) {
+		text06.draw(windowCenterW - text06.getWidth() * 0.5, windowCenterH - text06.getHeight() * 0.5);
+
+		bHasPhotoNeutral = false;
+		bHasPhotoIdeal = false;
 	}
 
 	if (bPaused) {
-		ofSetColor(255);
-		ofDrawBitmapString("Paused", 20, ofGetHeight() - 140);
+		ofSetColor(0);
+		ofDrawBitmapString("Paused", 20, ofGetHeight() - 160);
 	}	
 
 	if (bGuiVisible) {
 		gui.draw();
 	}
 
-	ofDrawBitmapString("imgNum " + ofToString(imgNum), 20, ofGetHeight() - 60);
+	ofSetColor(0);
+	ofDrawBitmapString("alphaOscillation " + ofToString(alphaOscillation), 20, ofGetHeight() - 80);
+	ofDrawBitmapString("momentNum " + ofToString(momentNum), 20, ofGetHeight() - 60);
 	ofDrawBitmapString("Framerate: " + ofToString((int)ofGetFrameRate()), 20, ofGetHeight() - 40);
 	ofDrawBitmapString("Press: ' ' to pause, 'g' to toggle gui, 'm' to toggle mesh, 'r' to reset tracker.", 20, ofGetHeight() - 20);
-
+	
 }
 
 
@@ -319,8 +332,8 @@ void ofApp::keyPressed(int key){
         vidGrabber.videoSettings();
     }
 
-	if (key == OF_KEY_LEFT && imgNum > 0)		imgNum--;
-	else if (key == OF_KEY_RIGHT && imgNum < 4)	imgNum++;
+	if (key == OF_KEY_LEFT && momentNum > 1)		momentNum--;
+	else if (key == OF_KEY_RIGHT && momentNum < 8)	momentNum++;
 
 	switch (key) {
 	

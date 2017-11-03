@@ -58,9 +58,12 @@ class ofApp : public ofBaseApp, public FaceOsc {
 		string sHello, sPressKey;
 		string sBestSmile, sDoBetter, sAlmost, sGreat;
 
-		ofImage image01, image02, image03;
-		int imgNum;
+		ofImage text01, text02, text03, text04, text05, text06;
+		int momentNum;
 		
 		float startTime, endTime;
 		bool bTimerReached;
+
+		float t;
+		float alphaOscillation;
 };
