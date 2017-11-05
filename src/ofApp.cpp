@@ -138,8 +138,6 @@ void ofApp::setup(){
 	verdana40.setLetterSpacing(1.100);
 
 	// string configuration
-	sHello = "HELLO";
-	sPressKey = "USE THE ARROWS TO NAVIGATE";
 	sBestSmile = "GIVE US YOUR BEST SMILE!";
 	sDoBetter = "YOU CAN DO BETTER";
 	sAlmost = "ALMOST THERE";
@@ -153,14 +151,16 @@ void ofApp::setup(){
 	text02.load("images/text02.png");
 	text03.load("images/text03.png");
 	text04.load("images/text04.png");
-	//text05.load("images/text05.png");
-	//text06.load("images/text06.png");
+	text05.load("images/text05.png");
+	text06.load("images/text06.png");
+	logoSmile.load("images/logoSmile.png");
 	momentNum = 1;
 	
 	// timer configuration
 	bTimerReached = false;
 	startTime = ofGetElapsedTimeMillis();
 	endTime = 2000;
+	
 }
 
 
@@ -189,23 +189,28 @@ void ofApp::update(){
 
 	t = ofGetElapsedTimef();
 	alphaOscillation = (sin(t * 0.2 * TWO_PI) * 0.5 + 0.5);
+
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-	ofBackground(ofColor::fireBrick);
+	ofBackground(ofColor::white);
 
+	logoSmile.draw(ofGetWindowWidth() - logoSmile.getWidth() - 10, 10);
+
+	// moment 01
 	if (momentNum == 1) {
 		text01.draw(windowCenterW - text01.getWidth() * 0.5, windowCenterH - text01.getHeight() * 0.5);
 	}
 
-	// when the user presses the key to move to the second moment
+	// moment 02
+	// when the user presses the key to move to moment 02
 	// the first photo labelled Neutral is taken after 2000 ms
 
 	if (momentNum == 2) {
 		text02.draw(windowCenterW - text02.getWidth() * 0.5, windowCenterH - text02.getHeight() * 0.5);
-		
+				
 		if (bHasPhotoNeutral == false) {
 			
 			float timer = ofGetElapsedTimeMillis() - startTime;
@@ -219,6 +224,7 @@ void ofApp::draw(){
 					photoFrameNeutral[i] = pixels[i];
 				}
 				photoFrameNeutralTexture.loadData(photoFrameNeutral);
+				cout << "frameneutraltexture has been loaded ! ";
 				ofSaveImage(photoFrameNeutral, ofToString(ofGetTimestampString() + " - photoFrameNeutral") + ".jpg");
 
 				bHasPhotoNeutral = true;
@@ -226,19 +232,34 @@ void ofApp::draw(){
 		}
 	}
 
-
+	// moment 03
 	if (momentNum == 3) { text03.draw(windowCenterW - text03.getWidth() * 0.5, windowCenterH - text03.getHeight() * 0.5); }
+
+	// moment 04
 	if (momentNum == 4) { text04.draw(windowCenterW - text04.getWidth() * 0.5, windowCenterH - text04.getHeight() * 0.5); }
 
+	// moment 05
 	if (momentNum == 5) {
+		ofBackground(ofColor::black);
 		ofSetColor(ofColor::mistyRose);
 		ofRectangle boundsBestSmile = verdana40.getStringBoundingBox(sBestSmile, 0, 0);
 		verdana40.drawString(sBestSmile, ofGetWindowWidth() * 0.5 - boundsBestSmile.width * 0.5, camHeight * 0.25);
 
+		// show the camera input
 		vidGrabber.draw(windowCenterW - (camWidth * 0.5), windowCenterH - (camHeight * 0.5));
+
+		// draw borders
+		ofNoFill();
+		ofSetLineWidth(40);
+		ofDrawRectangle(windowCenterW - (camWidth * 0.5), windowCenterH - (camHeight * 0.5), camWidth, camHeight);
 	}
 
-	if (tracker.getFound() && momentNum == 5) {
+	// found face
+	if (momentNum == 5 && tracker.getFound()) {
+
+		ofDrawBitmapString("sending OSC to " + host + ":" + ofToString(port), 20, ofGetHeight() - 140);
+		ofDrawBitmapString("Width: " + ofToString(mouthWidth), 20, ofGetHeight() - 120);
+		ofDrawBitmapString("Height: " + ofToString(mouthHeight), 20, ofGetHeight() - 100);
 
 		if (mouthWidth <= 12.0 || mouthHeight <= 2.0) {
 			ofRectangle boundsDoBetter = verdana14.getStringBoundingBox(sDoBetter, 0, 0);
@@ -259,6 +280,7 @@ void ofApp::draw(){
 					photoFrameIdeal[i] = pixels[i];
 				}
 				photoFrameIdealTexture.loadData(photoFrameIdeal);
+				cout << "frameidealtexture has been loaded !";
 				ofSaveImage(photoFrameIdeal, ofToString(ofGetTimestampString() + " - photoFrameIdeal") + ".jpg");
 
 				bHasPhotoIdeal = true;
@@ -270,14 +292,12 @@ void ofApp::draw(){
 			verdana14.drawString(sAlmost, ofGetWindowWidth() * 0.5 - boundsAlmost.width * 0.5, ofGetWindowHeight() * 0.6);
 		}
 
-		ofSetColor(0);
-		ofDrawBitmapString("sending OSC to " + host + ":" + ofToString(port), 20, ofGetHeight() - 140);
-		ofDrawBitmapString("Width: " + ofToString(mouthWidth), 20, ofGetHeight() - 120);
-		ofDrawBitmapString("Height: " + ofToString(mouthHeight), 20, ofGetHeight() - 100);
-
+		// if face mesh is drawn
 		if (bDrawMesh) {
-			ofSetColor(255, 255, 255, 255 * alphaOscillation);
+			ofSetColor(255, 255, 255, 55 + 200 * alphaOscillation);
 			ofSetLineWidth(1);
+
+			// overlap the mesh with the camera display
 			ofPushView();
 			ofTranslate(ofGetWindowWidth() * 0.5 - (vidGrabber.getWidth() * 0.5), ofGetWindowHeight() * 0.5 - (vidGrabber.getHeight() * 0.5));
 			tracker.getImageMesh().drawWireframe();
@@ -286,20 +306,32 @@ void ofApp::draw(){
 		}
 	}
 
-	if (tracker.getFound() == false && momentNum == 5) {
-		ofSetColor(0);
+	if (momentNum == 5 && tracker.getFound() == false) {
 		ofDrawBitmapString("Searching for face...", 20, ofGetHeight() - 140);
 	}
 
+	// moment 06
 	if (momentNum == 6) {
+		ofBackground(ofColor::black);
+		ofSetColor(ofColor::white);
+
+		// draw photo textures
 		photoFrameNeutralTexture.draw(windowCenterW - camWidth, windowCenterH - (camHeight * 0.5), camWidth, camHeight);
 		photoFrameIdealTexture.draw(windowCenterW, windowCenterH - (camHeight * 0.5), camWidth, camHeight);
+
+		// draw borders
+		ofNoFill();
+		ofSetLineWidth(40);
+		ofDrawRectangle(windowCenterW - camWidth, windowCenterH - (camHeight * 0.5), camWidth, camHeight);
+		ofDrawRectangle(windowCenterW, windowCenterH - (camHeight * 0.5), camWidth, camHeight);
 	}
 
+	// moment 07
 	if (momentNum == 7) {
 		text05.draw(windowCenterW - text05.getWidth() * 0.5, windowCenterH - text05.getHeight() * 0.5);
 	}
 	
+	// moment 08
 	if (momentNum == 8) {
 		text06.draw(windowCenterW - text06.getWidth() * 0.5, windowCenterH - text06.getHeight() * 0.5);
 
@@ -307,21 +339,22 @@ void ofApp::draw(){
 		bHasPhotoIdeal = false;
 	}
 
+	// camera is paused
 	if (bPaused) {
 		ofSetColor(0);
 		ofDrawBitmapString("Paused", 20, ofGetHeight() - 160);
 	}	
 
+	// draw GUI
 	if (bGuiVisible) {
 		gui.draw();
 	}
 
-	ofSetColor(0);
+	ofSetColor(ofColor::white);
 	ofDrawBitmapString("alphaOscillation " + ofToString(alphaOscillation), 20, ofGetHeight() - 80);
 	ofDrawBitmapString("momentNum " + ofToString(momentNum), 20, ofGetHeight() - 60);
 	ofDrawBitmapString("Framerate: " + ofToString((int)ofGetFrameRate()), 20, ofGetHeight() - 40);
 	ofDrawBitmapString("Press: ' ' to pause, 'g' to toggle gui, 'm' to toggle mesh, 'r' to reset tracker.", 20, ofGetHeight() - 20);
-	
 }
 
 

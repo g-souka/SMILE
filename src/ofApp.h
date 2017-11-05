@@ -55,10 +55,9 @@ class ofApp : public ofBaseApp, public FaceOsc {
 		ofTrueTypeFont verdana14;
 		ofTrueTypeFont verdana40;
 
-		string sHello, sPressKey;
 		string sBestSmile, sDoBetter, sAlmost, sGreat;
 
-		ofImage text01, text02, text03, text04, text05, text06;
+		ofImage text01, text02, text03, text04, text05, text06, logoSmile;
 		int momentNum;
 		
 		float startTime, endTime;
