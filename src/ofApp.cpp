@@ -159,7 +159,7 @@ void ofApp::setup(){
 
 	endTimeNeutralPhoto = 3000;
 	endTimeIdealPhoto = 5000;
-	endTimeFinalReset = 20000;
+	endTimeFinalReset = 3000;
 
 	startTime = ofGetElapsedTimeMillis();
 
@@ -215,7 +215,7 @@ void ofApp::draw(){
 
 	ofBackground(ofColor::white);
 
-	if (momentNum == 6 && momentNum == 7) {;
+	if (momentNum == 6 && momentNum == 7) {
 		logoSmileInverted.draw(ofGetWindowWidth() - logoSmileInverted.getWidth() - 10, 10);
 	}
 	else {
@@ -329,11 +329,24 @@ void ofApp::draw(){
 		ofRectangle boundsBestSmile = verdana14.getStringBoundingBox(sBestSmile, 0, 0);
 		verdana14.drawString(sBestSmile, windowCenterW + (camWidth * 0.25), windowCenterH + (camHeight * 0.5) + 60);
 
+		// if face mesh is drawn
+		if (bDrawMesh) {
+			ofSetColor(255, 255, 255, 55 + 200 * alphaOscillation);
+			ofSetLineWidth(1);
+
+			// overlap the mesh with the camera display
+			ofPushView();
+			ofTranslate(ofGetWindowWidth() * 0.5 - (vidGrabber.getWidth() * 0.5), ofGetWindowHeight() * 0.5 - (vidGrabber.getHeight() * 0.5));
+			tracker.getImageMesh().drawWireframe();
+			//tracker.getImageMesh().drawFaces();
+			ofPopView();
+		}
+
 		if (bHasPhotoIdeal == false) {
-
-			if (pctMouth >= 0.75) {
-				//startTime = ofGetElapsedTimeMillis();
-
+			if(pctMouth < 0.75) {
+				startTime = ofGetElapsedTimeMillis();
+			}
+			else {
 				float timer = ofGetElapsedTimeMillis() - startTime;
 				if (timer >= endTimeIdealPhoto && !bTimerIdealReached) {
 					bTimerIdealReached = true;
@@ -364,19 +377,6 @@ void ofApp::draw(){
 					bHasPhotoIdeal = true;
 				}
 			}
-		}
-
-		// if face mesh is drawn
-		if (bDrawMesh) {
-			ofSetColor(255, 255, 255, 55 + 200 * alphaOscillation);
-			ofSetLineWidth(1);
-
-			// overlap the mesh with the camera display
-			ofPushView();
-			ofTranslate(ofGetWindowWidth() * 0.5 - (vidGrabber.getWidth() * 0.5), ofGetWindowHeight() * 0.5 - (vidGrabber.getHeight() * 0.5));
-			tracker.getImageMesh().drawWireframe();
-			//tracker.getImageMesh().drawFaces();
-			ofPopView();
 		}
 	}
 
@@ -452,7 +452,7 @@ void ofApp::draw(){
 		gui.draw();
 	}
 
-	ofSetColor(ofColor::white);
+	ofSetColor(ofColor::hotPink);
 
 	if (bShowText) {
 		ofDrawBitmapString("alphaOscillation " + ofToString(alphaOscillation), 20, ofGetHeight() - 80);
