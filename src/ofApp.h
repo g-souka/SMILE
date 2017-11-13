@@ -19,20 +19,23 @@ class ofApp : public ofBaseApp, public FaceOsc {
 /*		void keyReleased(int key);
         void mouseMoved(int x, int y);
         void mouseDragged(int x, int y, int button);
-        void mousePressed(int x, int y, int button);
-	    void mouseReleased(int x, int y, int button);
+*/      void mousePressed(int x, int y, int button);
+/*	    void mouseReleased(int x, int y, int button);
         void mouseEntered(int x, int y);
         void mouseExited(int x, int y);
         void windowResized(int w, int h);
         void dragEvent(ofDragInfo dragInfo);
-        void gotMessage(ofMessage msg);
-*/  
-        ofVideoGrabber vidGrabber;
+ */     void gotMessage(ofMessage msg);
+  
+    
+		// webcam input and video frame variables
+		ofVideoGrabber vidGrabber;
 		ofPixels photoFrameNeutral;
 		ofTexture photoFrameNeutralTexture;
 		ofPixels photoFrameIdeal;
 		ofTexture photoFrameIdealTexture;
 
+		// video, face and window dimension variables
         int camWidth, camHeight;
 		int windowCenterW, windowCenterH;
 		int sourceWidth, sourceHeight;
@@ -45,24 +48,32 @@ class ofApp : public ofBaseApp, public FaceOsc {
 
 		void setVideoSource(bool useCamera);
 
+		// boolean variables
 		bool bUseCamera;
 		bool bPaused;
 		bool bDrawMesh;
 		bool bGuiVisible;
 		bool bHasPhotoNeutral;
 		bool bHasPhotoIdeal;
+		bool bShowText;
 
+		// ttf font variables
 		ofTrueTypeFont verdana14;
-		ofTrueTypeFont verdana40;
+		string sBestSmile;
 
-		string sBestSmile, sDoBetter, sAlmost, sGreat;
-
-		ofImage text01, text02, text03, text04, text05, text06, logoSmile;
+		// image variables
+		ofImage text01, text02, text03, text04, text05, text06, text07, text08, logoSmile, logoSmileInverted;
 		int momentNum;
 		
-		float startTime, endTime;
-		bool bTimerReached;
+		// timer variables
+		float startTime;
+		float endTimeNeutralPhoto, endTimeIdealPhoto, endTimeFinalReset;
+		bool bTimerNeutralReached, bTimerIdealReached, bTimerEndReached;
 
+		// alpha oscillation variables
 		float t;
 		float alphaOscillation;
+
+		// mouth percentage values variables
+		float pctWidth, pctHeight, pctMouth; // pct means percentage
 };
