@@ -215,7 +215,7 @@ void ofApp::draw(){
 
 	ofBackground(ofColor::white);
 
-	if (momentNum == 6 && momentNum == 7) {
+	if (momentNum == 6 || momentNum == 7) {
 		logoSmileInverted.draw(ofGetWindowWidth() - logoSmileInverted.getWidth() - 10, 10);
 	}
 	else {
@@ -249,7 +249,7 @@ void ofApp::draw(){
 		ofDrawBitmapString(info, 20, 20);
 				
 		if (bHasPhotoNeutral == false && bTimerNeutralReached) {
-			ofMessage msg("  Neutral Timer Reached\n  photoFrameNeutralTexture loaded");
+			ofMessage msg("  Neutral Timer Reached\n  photoFrameNeutralTexture loaded\n  !bTimerNeutralReached");
 			ofSendMessage(msg);
 
 			ofPixels & pixels = vidGrabber.getPixels();
@@ -260,6 +260,7 @@ void ofApp::draw(){
 			ofSaveImage(photoFrameNeutral, ofToString(ofGetTimestampString() + " - photoFrameNeutral") + ".jpg");
 
 			bHasPhotoNeutral = true;
+			bTimerNeutralReached = !bTimerNeutralReached;
 		}
 	}
 
@@ -364,7 +365,7 @@ void ofApp::draw(){
 				ofDrawBitmapString(info, 20, 20);
 
 				if (bTimerIdealReached) {
-					ofMessage msg("  Ideal Timer Reached\n  photoFrameIdealTexture loaded");
+					ofMessage msg("  Ideal Timer Reached\n  photoFrameIdealTexture loaded\n  !bTimerIdealReached");
 					ofSendMessage(msg);
 
 					ofPixels & pixels = vidGrabber.getPixels();
@@ -375,6 +376,7 @@ void ofApp::draw(){
 					ofSaveImage(photoFrameIdeal, ofToString(ofGetTimestampString() + " - photoFrameIdeal") + ".jpg");
 
 					bHasPhotoIdeal = true;
+					bTimerIdealReached = !bTimerIdealReached;
 				}
 			}
 		}
@@ -417,7 +419,7 @@ void ofApp::draw(){
 		text08.draw(windowCenterW - text08.getWidth() * 0.5, windowCenterH - text08.getHeight() * 0.5);
 
 		float timer = ofGetElapsedTimeMillis() - startTime;
-		if (timer >= endTimeFinalReset && !bTimerEndReached) {
+		if (timer >= endTimeFinalReset && bTimerEndReached == false) {
 			bTimerEndReached = true;
 
 			// get the percentage of the timer
@@ -431,7 +433,7 @@ void ofApp::draw(){
 			ofSetColor(0);
 			ofDrawBitmapString(info, 20, 20);
 		
-			ofMessage msg("  End Timer Reached");
+			ofMessage msg("  End Timer Reached\n  bHasPhotoNeutral = false\n  bHasPhotoIdeal = false");
 			ofSendMessage(msg);
 
 			bHasPhotoNeutral = false;
