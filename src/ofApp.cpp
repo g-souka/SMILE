@@ -126,16 +126,6 @@ void ofApp::setup(){
 	mouthWidth = tracker.getGesture(ofxFaceTracker::MOUTH_WIDTH);
 	mouthHeight = tracker.getGesture(ofxFaceTracker::MOUTH_HEIGHT);
 
-	// font configuration
-	ofTrueTypeFont::setGlobalDpi(72);
-
-	verdana14.load("verdana.ttf", 14, true, true);
-	verdana14.setLineHeight(18.0f);
-	verdana14.setLetterSpacing(1.037);
-
-	// string configuration
-	sBestSmile = "SMILE!";
-
 	// xml settings load
 	loadSettings();
 
@@ -148,8 +138,17 @@ void ofApp::setup(){
 	text06.load("images/text06.png");
 	text07.load("images/text07.png");
 	text08.load("images/text08.png");
+
+	textSmile.load("images/textSmile.png");
+	textNatural.load("images/textNatural.png");
+	textProjection.load("images/textProjection.png");
+	textBoth.load("images/textBothAreYou.png");
+	textHappiness.load("images/textHappiness.png");
+
 	logoSmile.load("images/logoSmile.png");
 	logoSmileInverted.load("images/logoSmileInverted.png");
+
+	// moment start
 	momentNum = 1;
 	
 	// timer configuration
@@ -157,9 +156,9 @@ void ofApp::setup(){
 	bTimerIdealReached = false;
 	bTimerEndReached = false;
 
-	endTimeNeutralPhoto = 3000;
-	endTimeIdealPhoto = 5000;
-	endTimeFinalReset = 3000;
+	endTimeNeutralPhoto = 2000;
+	endTimeIdealPhoto = 2000;
+	endTimeFinalReset = 10000;
 
 	startTime = ofGetElapsedTimeMillis();
 
@@ -169,7 +168,7 @@ void ofApp::setup(){
 	pctMouth = pctWidth * 0.7 + pctHeight * 0.3;
 
 	// text bool configuration
-	bShowText = true;
+	bShowText = false;
 }
 
 
@@ -214,6 +213,9 @@ void ofApp::update(){
 void ofApp::draw(){
 
 	ofBackground(ofColor::white);
+	ofSetColor(ofColor::white);
+
+	ofSetLineWidth(5);
 
 	if (momentNum == 6 || momentNum == 7) {
 		logoSmileInverted.draw(ofGetWindowWidth() - logoSmileInverted.getWidth() - 10, 10);
@@ -240,14 +242,16 @@ void ofApp::draw(){
 		// get the percentage of the timer
 		float pct = ofMap(timer, 0.0, endTimeNeutralPhoto, 0.0, 1.0, true);
 
-		// some information about the timer
-		string  info = "Start Time: " + ofToString(startTime, 1) + "\n";
-				info += "End Time:   " + ofToString(endTimeNeutralPhoto / 1000.0, 1) + " seconds\n";
-				info += "Timer:      " + ofToString(timer / 1000.0, 1) + " seconds\n";
-				info += "Percentage: " + ofToString(pct * 100, 1) + "%\n";
-		ofSetColor(0);
-		ofDrawBitmapString(info, 20, 20);
-				
+		if (bShowText) {
+			// some information about the timer
+			string  info = "Start Time: " + ofToString(startTime, 1) + "\n";
+			info += "End Time:   " + ofToString(endTimeNeutralPhoto / 1000.0, 1) + " seconds\n";
+			info += "Timer:      " + ofToString(timer / 1000.0, 1) + " seconds\n";
+			info += "Percentage: " + ofToString(pct * 100, 1) + "%\n";
+			ofSetColor(0);
+			ofDrawBitmapString(info, 20, 20);
+		}
+
 		if (bHasPhotoNeutral == false && bTimerNeutralReached) {
 			ofMessage msg("  Neutral Timer Reached\n  photoFrameNeutralTexture loaded\n  !bTimerNeutralReached");
 			ofSendMessage(msg);
@@ -276,14 +280,13 @@ void ofApp::draw(){
 	// moment 06
 	if (momentNum == 6) {
 		ofBackground(ofColor::black);
-
 		logoSmileInverted.draw(ofGetWindowWidth() - logoSmileInverted.getWidth() - 10, 10);
 
 		// show the camera input
 		vidGrabber.draw(windowCenterW - (camWidth * 0.5), windowCenterH - (camHeight * 0.5), camWidth, camHeight);
 
 		// draw borders
-		ofSetLineWidth(3);
+		ofSetLineWidth(2);
 
 		// ofPolyline to draw a video border
 		vector<ofPoint> pts;
@@ -313,26 +316,26 @@ void ofApp::draw(){
 
 		// horizontal bar showing smile progress
 		ofFill();
-		ofSetColor(100);
+		ofSetColor(20, 20, 20);
 		ofDrawRectangle(windowCenterW - (camWidth * 0.5), windowCenterH + (camHeight * 0.5) + 20, camWidth, 20);
 
 		// percentage of bar width that indicates smile amount
-		ofSetColor(ofColor::deepPink, 200);
+		ofSetColor(ofColor::white, 200);
 		ofDrawRectangle(windowCenterW - (camWidth * 0.5), windowCenterH + (camHeight * 0.5) + 20, pctMouth * camWidth, 20);
 
 		// threshold to cross with smile
-		ofSetLineWidth(3);
-		ofSetColor(255, 255, 255, 128);
-		ofDrawLine(windowCenterW + (camWidth * 0.25), windowCenterH + (camHeight * 0.5) + 20, windowCenterW + (camWidth * 0.25), windowCenterH + (camHeight * 0.5) + 40);
-		
-		// GIVE US YOUR BEST SMILE text
+		// the line indicates the position of the threshold
+		ofSetLineWidth(2);
 		ofSetColor(ofColor::white);
-		ofRectangle boundsBestSmile = verdana14.getStringBoundingBox(sBestSmile, 0, 0);
-		verdana14.drawString(sBestSmile, windowCenterW + (camWidth * 0.25), windowCenterH + (camHeight * 0.5) + 60);
+		ofDrawLine(windowCenterW + (camWidth * 0.28), windowCenterH + (camHeight * 0.5) + 20, windowCenterW + (camWidth * 0.28), windowCenterH + (camHeight * 0.5) + 40);
+		
+		// SMILE text
+		ofSetColor(ofColor::white);
+		textSmile.draw(windowCenterW + (camWidth * 0.28), windowCenterH + (camHeight * 0.5) + 50);
 
 		// if face mesh is drawn
 		if (bDrawMesh) {
-			ofSetColor(255, 255, 255, 55 + 200 * alphaOscillation);
+			ofSetColor(255, 255, 255, 55 + 220 * alphaOscillation);
 			ofSetLineWidth(1);
 
 			// overlap the mesh with the camera display
@@ -343,8 +346,10 @@ void ofApp::draw(){
 			ofPopView();
 		}
 
+		ofSetColor(ofColor::white);
+
 		if (bHasPhotoIdeal == false) {
-			if(pctMouth < 0.75) {
+			if(pctMouth < 0.78) {	// this value indicates how much the people has to smile, range is [0, 1]
 				startTime = ofGetElapsedTimeMillis();
 			}
 			else {
@@ -356,13 +361,15 @@ void ofApp::draw(){
 				// get the percentage of the timer
 				float pct = ofMap(timer, 0.0, endTimeIdealPhoto, 0.0, 1.0, true);
 
-				// some information about the timer
-				string  info = "Start Time: " + ofToString(startTime, 1) + "\n";
-						info += "End Time:   " + ofToString(endTimeIdealPhoto / 1000.0, 1) + " seconds\n";
-						info += "Timer:      " + ofToString(timer / 1000.0, 1) + " seconds\n";
-						info += "Percentage: " + ofToString(pct * 100, 1) + "%\n";
-				ofSetColor(ofColor::hotPink);
-				ofDrawBitmapString(info, 20, 20);
+				if (bShowText) {
+					// some information about the timer
+					string  info = "Start Time: " + ofToString(startTime, 1) + "\n";
+					info += "End Time:   " + ofToString(endTimeIdealPhoto / 1000.0, 1) + " seconds\n";
+					info += "Timer:      " + ofToString(timer / 1000.0, 1) + " seconds\n";
+					info += "Percentage: " + ofToString(pct * 100, 1) + "%\n";
+					ofSetColor(ofColor::deepPink);
+					ofDrawBitmapString(info, 20, 20);
+				}
 
 				if (bTimerIdealReached) {
 					ofMessage msg("  Ideal Timer Reached\n  photoFrameIdealTexture loaded\n  !bTimerIdealReached");
@@ -377,12 +384,15 @@ void ofApp::draw(){
 
 					bHasPhotoIdeal = true;
 					bTimerIdealReached = !bTimerIdealReached;
+
+					// jump automatically to moment 07 when the picture is taken
+					momentNum = 7;
 				}
 			}
 		}
 	}
 
-	if (momentNum == 6 && tracker.getFound() == false) {
+	if (momentNum == 6 && tracker.getFound() == false && bShowText) {
 		ofDrawBitmapString("Searching for face...", 20, ofGetHeight() - 140);
 	}
 
@@ -394,28 +404,79 @@ void ofApp::draw(){
 		logoSmileInverted.draw(ofGetWindowWidth() - logoSmileInverted.getWidth() - 10, 10);
 
 		// draw photo textures
-		photoFrameNeutralTexture.draw(windowCenterW - camWidth, windowCenterH - (camHeight * 0.5), camWidth, camHeight);
-		photoFrameIdealTexture.draw(windowCenterW, windowCenterH - (camHeight * 0.5), camWidth, camHeight);
+		photoFrameNeutralTexture.draw(windowCenterW - (camWidth * 0.5), windowCenterH - (camHeight * 0.5), camWidth, camHeight);
 
+		// WHAT IS HAPPINESS text
+		textHappiness.draw(windowCenterW - (textHappiness.getWidth() * 0.5), windowCenterH + (camHeight * 0.5) + 20);
+		
 		// draw borders
 		ofNoFill();
-		ofSetLineWidth(20);
-		ofDrawRectangle(windowCenterW - camWidth, windowCenterH - (camHeight * 0.5), camWidth, camHeight);
-		ofDrawRectangle(windowCenterW, windowCenterH - (camHeight * 0.5), camWidth, camHeight);
+		// video borders
+		ofDrawRectangle(windowCenterW - (camWidth * 0.5), windowCenterH - (camHeight * 0.5), camWidth, camHeight);
+		// text borders
+		ofDrawRectangle(windowCenterW - (camWidth * 0.5), windowCenterH + (camHeight * 0.5), camWidth, textHappiness.getHeight() + 40);
 	}
 
 	// moment 08
 	if (momentNum == 8) {
-		text06.draw(windowCenterW - text06.getWidth() * 0.5, windowCenterH - text06.getHeight() * 0.5);
+		ofBackground(ofColor::black);
+		ofSetColor(ofColor::white);
+
+		logoSmileInverted.draw(ofGetWindowWidth() - logoSmileInverted.getWidth() - 10, 10);
+
+		// draw photo textures
+		photoFrameNeutralTexture.draw(windowCenterW - camWidth, windowCenterH - (camHeight * 0.5), camWidth, camHeight);
+		photoFrameIdealTexture.draw(windowCenterW, windowCenterH - (camHeight * 0.5), camWidth, camHeight);
+
+		// Natural | Projected text
+		textNatural.draw(windowCenterW - (camWidth * 0.5) - (textNatural.getWidth() * 0.5), windowCenterH + (camHeight * 0.5) + 20);
+		textProjection.draw(windowCenterW + (camWidth * 0.5) - (textProjection.getWidth() * 0.5), windowCenterH + (camHeight * 0.5) + 20);
+
+		// draw borders
+		ofNoFill();
+		// video borders
+		ofDrawRectangle(windowCenterW - camWidth, windowCenterH - (camHeight * 0.5), camWidth * 2, camHeight);
+		// text borders
+		ofDrawRectangle(windowCenterW - camWidth, windowCenterH + (camHeight * 0.5), camWidth * 2, textProjection.getHeight() + 40);
+		// vertical line
+		ofDrawLine(windowCenterW, windowCenterH - (camHeight * 0.5), windowCenterW, windowCenterH + (camHeight * 0.5) + textProjection.getHeight() + 40);
 	}
-	
+
 	// moment 09
 	if (momentNum == 9) {
-		text07.draw(windowCenterW - text07.getWidth() * 0.5, windowCenterH - text07.getHeight() * 0.5);
+		ofBackground(ofColor::black);
+		ofSetColor(ofColor::white);
+
+		logoSmileInverted.draw(ofGetWindowWidth() - logoSmileInverted.getWidth() - 10, 10);
+
+		// draw photo textures
+		photoFrameNeutralTexture.draw(windowCenterW - camWidth, windowCenterH - (camHeight * 0.5), camWidth, camHeight);
+		photoFrameIdealTexture.draw(windowCenterW, windowCenterH - (camHeight * 0.5), camWidth, camHeight);
+
+		// But Both Are You text
+		textBoth.draw(windowCenterW - (textBoth.getWidth() * 0.5), windowCenterH + (camHeight * 0.5) + 20);
+
+		// draw borders
+		ofNoFill();
+		//video borders
+		ofDrawRectangle(windowCenterW - camWidth, windowCenterH - (camHeight * 0.5), camWidth, camHeight);
+		ofDrawRectangle(windowCenterW, windowCenterH - (camHeight * 0.5), camWidth, camHeight);
+		// text borders
+		ofDrawRectangle(windowCenterW - camWidth, windowCenterH + (camHeight * 0.5), camWidth * 2, textBoth.getHeight() + 40);
 	}
 
 	// moment 10
 	if (momentNum == 10) {
+		text06.draw(windowCenterW - text06.getWidth() * 0.5, windowCenterH - text06.getHeight() * 0.5);
+	}
+	
+	// moment 11
+	if (momentNum == 11) {
+		text07.draw(windowCenterW - text07.getWidth() * 0.5, windowCenterH - text07.getHeight() * 0.5);
+	}
+
+	// moment 12
+	if (momentNum == 12) {
 		text08.draw(windowCenterW - text08.getWidth() * 0.5, windowCenterH - text08.getHeight() * 0.5);
 
 		float timer = ofGetElapsedTimeMillis() - startTime;
@@ -425,14 +486,16 @@ void ofApp::draw(){
 			// get the percentage of the timer
 			float pct = ofMap(timer, 0.0, endTimeFinalReset, 0.0, 1.0, true);
 
-			// some information about the timer
-			string  info = "Start Time: " + ofToString(startTime, 1) + "\n";
-			info += "End Time:   " + ofToString(endTimeFinalReset / 1000.0, 1) + " seconds\n";
-			info += "Timer:      " + ofToString(timer / 1000.0, 1) + " seconds\n";
-			info += "Percentage: " + ofToString(pct * 100, 1) + "%\n";
-			ofSetColor(0);
-			ofDrawBitmapString(info, 20, 20);
-		
+			if (bShowText) {
+				// some information about the timer
+				string  info = "Start Time: " + ofToString(startTime, 1) + "\n";
+				info += "End Time:   " + ofToString(endTimeFinalReset / 1000.0, 1) + " seconds\n";
+				info += "Timer:      " + ofToString(timer / 1000.0, 1) + " seconds\n";
+				info += "Percentage: " + ofToString(pct * 100, 1) + "%\n";
+				ofSetColor(ofColor::hotPink);
+				ofDrawBitmapString(info, 20, 20);
+			}
+
 			ofMessage msg("  End Timer Reached\n  bHasPhotoNeutral = false\n  bHasPhotoIdeal = false");
 			ofSendMessage(msg);
 
@@ -444,7 +507,7 @@ void ofApp::draw(){
 	}
 
 	// camera is paused
-	if (bPaused) {
+	if (bPaused && bShowText) {
 		ofSetColor(0);
 		ofDrawBitmapString("Paused", 20, ofGetHeight() - 160);
 	}	
@@ -454,9 +517,8 @@ void ofApp::draw(){
 		gui.draw();
 	}
 
-	ofSetColor(ofColor::hotPink);
-
 	if (bShowText) {
+		ofSetColor(ofColor::hotPink);
 		ofDrawBitmapString("alphaOscillation " + ofToString(alphaOscillation), 20, ofGetHeight() - 80);
 		ofDrawBitmapString("momentNum " + ofToString(momentNum), 20, ofGetHeight() - 60);
 		ofDrawBitmapString("Framerate: " + ofToString((int)ofGetFrameRate()), 20, ofGetHeight() - 40);
@@ -525,7 +587,7 @@ void ofApp::mouseDragged(int x, int y, int button){
 void ofApp::mousePressed(int x, int y, int button){
 
 	if (button == 2 && momentNum > 1)		momentNum--;
-	else if (button == 0 && momentNum < 10)	momentNum++;
+	else if (button == 0 && momentNum < 12)	momentNum++;
 
 	if (momentNum == 2) {
 		startTime = ofGetElapsedTimeMillis();
@@ -535,7 +597,7 @@ void ofApp::mousePressed(int x, int y, int button){
 		startTime = ofGetElapsedTimeMillis();
 	}
 
-	if (momentNum == 10) {
+	if (momentNum == 12) {
 		startTime = ofGetElapsedTimeMillis();
 	}
 }

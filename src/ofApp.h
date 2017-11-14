@@ -57,12 +57,10 @@ class ofApp : public ofBaseApp, public FaceOsc {
 		bool bHasPhotoIdeal;
 		bool bShowText;
 
-		// ttf font variables
-		ofTrueTypeFont verdana14;
-		string sBestSmile;
-
 		// image variables
-		ofImage text01, text02, text03, text04, text05, text06, text07, text08, logoSmile, logoSmileInverted;
+		ofImage text01, text02, text03, text04, text05, text06, text07, text08;
+		ofImage logoSmile, logoSmileInverted;
+		ofImage textSmile, textNatural, textProjection, textBoth, textHappiness;
 		int momentNum;
 		
 		// timer variables
