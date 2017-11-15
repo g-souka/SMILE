@@ -280,30 +280,43 @@ void ofApp::draw(){
 	// moment 06
 	if (momentNum == 6) {
 		ofBackground(ofColor::black);
+        //ofBackground(127 + 255 * (pctMouth * 0.5));
 		logoSmileInverted.draw(ofGetWindowWidth() - logoSmileInverted.getWidth() - 10, 10);
 
 		// show the camera input
 		vidGrabber.draw(windowCenterW - (camWidth * 0.5), windowCenterH - (camHeight * 0.5), camWidth, camHeight);
 
 		// draw borders
-		ofSetLineWidth(2);
+        ofNoFill();
+		ofSetLineWidth(5);
+        // video borders
+        ofDrawRectangle(windowCenterW - (camWidth * 0.5), windowCenterH - (camHeight * 0.5), camWidth, camHeight);
+        
 
 		// ofPolyline to draw a video border
-		vector<ofPoint> pts;
+/*		vector<ofPoint> pts;
 
-			pts.push_back(ofPoint (windowCenterW - (camWidth * 0.5) + (camWidth * 0.06), windowCenterH - (camHeight * 0.5) + (camHeight * 0.06)) );
-			pts.push_back(ofPoint (windowCenterW + (camWidth * 0.5) - (camWidth * 0.06), windowCenterH - (camHeight * 0.5) + (camHeight * 0.06)) );
-			pts.push_back(ofPoint (windowCenterW + (camWidth * 0.5) - (camWidth * 0.06), windowCenterH + (camHeight * 0.5) - (camHeight * 0.06)) );
-			pts.push_back(ofPoint (windowCenterW - (camWidth * 0.5) + (camWidth * 0.06), windowCenterH + (camHeight * 0.5) - (camHeight * 0.06)) );
-			pts.push_back(ofPoint (windowCenterW - (camWidth * 0.5) + (camWidth * 0.06), windowCenterH - (camHeight * 0.5) + (camHeight * 0.06)) );
+            // border inside
+			//pts.push_back(ofPoint (windowCenterW - (camWidth * 0.5) + (camWidth * 0.06), windowCenterH - (camHeight * 0.5) + (camHeight * 0.06)) );
+			//pts.push_back(ofPoint (windowCenterW + (camWidth * 0.5) - (camWidth * 0.06), windowCenterH - (camHeight * 0.5) + (camHeight * 0.06)) );
+			//pts.push_back(ofPoint (windowCenterW + (camWidth * 0.5) - (camWidth * 0.06), windowCenterH + (camHeight * 0.5) - (camHeight * 0.06)) );
+			//pts.push_back(ofPoint (windowCenterW - (camWidth * 0.5) + (camWidth * 0.06), windowCenterH + (camHeight * 0.5) - (camHeight * 0.06)) );
+			//pts.push_back(ofPoint (windowCenterW - (camWidth * 0.5) + (camWidth * 0.06), windowCenterH - (camHeight * 0.5) + (camHeight * 0.06)) );
+            // border video
+            pts.push_back(ofPoint (windowCenterW - (camWidth * 0.5), windowCenterH - (camHeight * 0.5)) );
+            pts.push_back(ofPoint (windowCenterW + (camWidth * 0.5), windowCenterH - (camHeight * 0.5)) );
+            pts.push_back(ofPoint (windowCenterW + (camWidth * 0.5), windowCenterH + (camHeight * 0.5)) );
+            pts.push_back(ofPoint (windowCenterW - (camWidth * 0.5), windowCenterH + (camHeight * 0.5)) );
+            pts.push_back(ofPoint (windowCenterW - (camWidth * 0.5), windowCenterH - (camHeight * 0.5)) );
 			
 		ofPolyline videoBorder(pts);
 		videoBorder.draw();
-	}
+*/
+    }
 
 	// found face
 	if (momentNum == 6 && tracker.getFound()) {
-
+        
 		if (bShowText) {
 			ofDrawBitmapString("Start Time: " + ofToString(startTime, 1), 20, ofGetHeight() - 220);
 			ofDrawBitmapString("End Time:   " + ofToString(endTimeIdealPhoto / 1000.0, 1) + " seconds", 20, ofGetHeight() - 200);
@@ -327,11 +340,11 @@ void ofApp::draw(){
 		// the line indicates the position of the threshold
 		ofSetLineWidth(2);
 		ofSetColor(ofColor::white);
-		ofDrawLine(windowCenterW + (camWidth * 0.28), windowCenterH + (camHeight * 0.5) + 20, windowCenterW + (camWidth * 0.28), windowCenterH + (camHeight * 0.5) + 40);
+		ofDrawLine(windowCenterW + (camWidth * 0.25), windowCenterH + (camHeight * 0.5) + 20, windowCenterW + (camWidth * 0.25), windowCenterH + (camHeight * 0.5) + 40);
 		
 		// SMILE text
 		ofSetColor(ofColor::white);
-		textSmile.draw(windowCenterW + (camWidth * 0.28), windowCenterH + (camHeight * 0.5) + 50);
+		textSmile.draw(windowCenterW + (camWidth * 0.25), windowCenterH + (camHeight * 0.5) + 50);
 
 		// if face mesh is drawn
 		if (bDrawMesh) {
@@ -349,7 +362,7 @@ void ofApp::draw(){
 		ofSetColor(ofColor::white);
 
 		if (bHasPhotoIdeal == false) {
-			if(pctMouth < 0.78) {	// this value indicates how much the people has to smile, range is [0, 1]
+			if(pctMouth < 0.75) {	// this value indicates how much the people has to smile, range is [0, 1]
 				startTime = ofGetElapsedTimeMillis();
 			}
 			else {
