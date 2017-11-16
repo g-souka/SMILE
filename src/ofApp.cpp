@@ -169,6 +169,9 @@ void ofApp::setup(){
 
 	// text bool configuration
 	bShowText = false;
+    
+    // backward bool configuration
+    bAllowBackwards = false;
 }
 
 
@@ -291,27 +294,6 @@ void ofApp::draw(){
 		ofSetLineWidth(5);
         // video borders
         ofDrawRectangle(windowCenterW - (camWidth * 0.5), windowCenterH - (camHeight * 0.5), camWidth, camHeight);
-        
-
-		// ofPolyline to draw a video border
-/*		vector<ofPoint> pts;
-
-            // border inside
-			//pts.push_back(ofPoint (windowCenterW - (camWidth * 0.5) + (camWidth * 0.06), windowCenterH - (camHeight * 0.5) + (camHeight * 0.06)) );
-			//pts.push_back(ofPoint (windowCenterW + (camWidth * 0.5) - (camWidth * 0.06), windowCenterH - (camHeight * 0.5) + (camHeight * 0.06)) );
-			//pts.push_back(ofPoint (windowCenterW + (camWidth * 0.5) - (camWidth * 0.06), windowCenterH + (camHeight * 0.5) - (camHeight * 0.06)) );
-			//pts.push_back(ofPoint (windowCenterW - (camWidth * 0.5) + (camWidth * 0.06), windowCenterH + (camHeight * 0.5) - (camHeight * 0.06)) );
-			//pts.push_back(ofPoint (windowCenterW - (camWidth * 0.5) + (camWidth * 0.06), windowCenterH - (camHeight * 0.5) + (camHeight * 0.06)) );
-            // border video
-            pts.push_back(ofPoint (windowCenterW - (camWidth * 0.5), windowCenterH - (camHeight * 0.5)) );
-            pts.push_back(ofPoint (windowCenterW + (camWidth * 0.5), windowCenterH - (camHeight * 0.5)) );
-            pts.push_back(ofPoint (windowCenterW + (camWidth * 0.5), windowCenterH + (camHeight * 0.5)) );
-            pts.push_back(ofPoint (windowCenterW - (camWidth * 0.5), windowCenterH + (camHeight * 0.5)) );
-            pts.push_back(ofPoint (windowCenterW - (camWidth * 0.5), windowCenterH - (camHeight * 0.5)) );
-			
-		ofPolyline videoBorder(pts);
-		videoBorder.draw();
-*/
     }
 
 	// found face
@@ -535,7 +517,7 @@ void ofApp::draw(){
 		ofDrawBitmapString("alphaOscillation " + ofToString(alphaOscillation), 20, ofGetHeight() - 80);
 		ofDrawBitmapString("momentNum " + ofToString(momentNum), 20, ofGetHeight() - 60);
 		ofDrawBitmapString("Framerate: " + ofToString((int)ofGetFrameRate()), 20, ofGetHeight() - 40);
-		ofDrawBitmapString("Press: 'p' to pause, 'g' to toggle gui, 'm' to toggle mesh, 'r' to reset tracker.", 20, ofGetHeight() - 20);
+		ofDrawBitmapString("Press: 'p' to pause, 'g' to toggle gui, 'm' to toggle mesh, 'r' to reset tracker, 'b' to allow backward movement.", 20, ofGetHeight() - 20);
 	}
 }
 
@@ -579,6 +561,10 @@ void ofApp::keyPressed(int key){
 		case 'g':
 			bGuiVisible = !bGuiVisible;
 			break;
+            
+        case 'b':
+            bAllowBackwards = !bAllowBackwards;
+            break;
 	}
 }
 
@@ -599,8 +585,13 @@ void ofApp::mouseDragged(int x, int y, int button){
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
 
-	if (button == 2 && momentNum > 1)		momentNum--;
-	else if (button == 0 && momentNum < 12)	momentNum++;
+    if(bAllowBackwards) {
+        if (button == 2 && momentNum > 1) momentNum--; // if backward movement is not allowed the RMB does nothing
+        else if (button == 0 && momentNum < 12)	momentNum++;
+    }
+    else {
+        if (button == 0 && momentNum < 12 && momentNum != 6) momentNum++; // in moment 6, the only way to move is by using your smile, LMB does not work
+    }
 
 	if (momentNum == 2) {
 		startTime = ofGetElapsedTimeMillis();

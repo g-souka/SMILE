@@ -56,6 +56,7 @@ class ofApp : public ofBaseApp, public FaceOsc {
 		bool bHasPhotoNeutral;
 		bool bHasPhotoIdeal;
 		bool bShowText;
+        bool bAllowBackwards; // to prevent the user to go back in the slides
 
 		// image variables
 		ofImage text01, text02, text03, text04, text05, text06, text07, text08;
